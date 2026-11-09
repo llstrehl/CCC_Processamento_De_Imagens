@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+data/*
+!data/README.md
+models/*
+!models/.gitkeep
+*.h5
+*.keras
+*.tflite
+.DS_Store
