@@ -1,7 +1,7 @@
 """Escala: detecta a moeda de referência e converte pixels em mm."""
 import numpy as np
 
-COIN_DIAMETER_MM = 25.0  # ajustar conforme a moeda usada
+COIN_DIAMETER_MM = None  # A CONFIRMAR: definir a moeda usada e seu diâmetro real em mm
 
 
 def detect_coin(image: np.ndarray):

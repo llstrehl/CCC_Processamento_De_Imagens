@@ -10,12 +10,20 @@ Aplicação com interface gráfica que, a partir de uma foto de grãos sobre sup
 4. Gera um resumo do lote: total, % de defeituosos e tamanho médio.
 
 ## Stack
-- Python 3.10+
+Definido pelo grupo:
 - OpenCV (segmentação, contornos, medição)
-- TensorFlow/Keras (classificador CNN, treinado no Colab)
-- GUI: Tkinter
+- TensorFlow (classificador CNN)
+- Google Colab (apenas para treinar o modelo)
+- Interface gráfica rodando localmente (exigência do enunciado)
 
-## Estrutura
+A confirmar:
+- Biblioteca da GUI
+- Versão do Python
+- Dependências extras 
+- Tipo de grão
+- Dataset 
+
+## Estrutura (proposta)
 ```
 src/segmentation.py   Watershed e contornos
 src/scale.py          detecção da moeda e conversão px -> mm
@@ -29,16 +37,9 @@ docs/                 artigo, relatório, vídeo
 ```
 
 ## Como rodar
-```
-pip install -r requirements.txt
-python -m src.gui
-```
+A confirmar 
 
 ## Condições da foto
-Vista de cima, fundo claro e liso, sem sombras fortes, moeda visível no enquadramento.
-
-## Equipe e divisão de tarefas
-_A definir pelo grupo._
 
 ## Prazos
 Entrega: 30/11.

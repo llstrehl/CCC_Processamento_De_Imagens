@@ -1,5 +1,8 @@
+# Base discutida pelo grupo
 opencv-python
-numpy
 tensorflow
+
+# A confirmar
+numpy
 pillow
 matplotlib
