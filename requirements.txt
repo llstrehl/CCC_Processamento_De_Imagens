@@ -1,14 +1,18 @@
-# Python 3.12 (TensorFlow ainda não tem versão estável para 3.14)
+# Python 3.12 (o TensorFlow ainda não tem versão estável para 3.14)
 
-# Base discutida pelo grupo
+# Processamento de imagem e cálculo numérico
 opencv-python==5.1.0.95
+numpy==2.5.5
+
+# Interface gráfica
+FreeSimpleGUI==5.3.0.post1
+pillow==13.0.0
+
+# Classificador CNN
 tensorflow==2.21.0
 
-# A confirmar
-numpy==2.5.5
-pillow==13.0.0
+# Gráficos do notebook de treino
 matplotlib==3.11.2
 
-# Interface gráfica e testes
-FreeSimpleGUI==5.3.0.post1
+# Testes automatizados
 pytest==9.2.0
