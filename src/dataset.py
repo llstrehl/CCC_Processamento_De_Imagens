@@ -8,6 +8,11 @@ vez de recortar cada grão à mão.
 Uso:
 
     python -m src.dataset data/fotos --saida data/recortes
+
+Para fotos sem moeda (por exemplo, imagens da internet), use ``--sem-moeda``:
+assim nenhum círculo falso é tomado como moeda e apaga os grãos.
+
+    python -m src.dataset data/fotos_google --saida data/recortes_google --sem-moeda
 """
 
 import argparse
@@ -23,19 +28,24 @@ from . import segmentation as seg
 EXTENSOES = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
 
 
-def extrair_de_foto(caminho, pasta_saida, prefixo=None):
-    """Extrai os recortes de uma foto e devolve quantos foram salvos por classe."""
+def extrair_de_foto(caminho, pasta_saida, prefixo=None, usar_moeda=True):
+    """Extrai os recortes de uma foto e devolve quantos foram salvos por classe.
+
+    Com ``usar_moeda=False`` a detecção da moeda é pulada. Sem isso, numa foto
+    sem moeda o HoughCircles pode achar um círculo falso grande, e os grãos
+    dentro dele são apagados da máscara antes de a moeda ser validada.
+    """
     from .pipeline import load_image
 
     imagem = load_image(caminho)
     imagem, _ = seg.resize_to_width(imagem)
 
-    moeda = scale_mod.detect_coin(imagem)
+    moeda = scale_mod.detect_coin(imagem) if usar_moeda else None
     contornos, _ = seg.segment_grains(imagem, ignore_circle=moeda)
     if not contornos:
         return {"inteiro": 0, "defeituoso": 0}
 
-    if not scale_mod.validate_coin(moeda, contornos):
+    if moeda is not None and not scale_mod.validate_coin(moeda, contornos):
         moeda = None
         contornos, _ = seg.segment_grains(imagem)
 
@@ -54,7 +64,7 @@ def extrair_de_foto(caminho, pasta_saida, prefixo=None):
     return contagem
 
 
-def extrair_pasta(pasta_fotos, pasta_saida):
+def extrair_pasta(pasta_fotos, pasta_saida, usar_moeda=True):
     """Extrai os recortes de todas as fotos de uma pasta."""
     pasta_fotos = Path(pasta_fotos)
     fotos = sorted(p for p in pasta_fotos.rglob("*") if p.suffix.lower() in EXTENSOES)
@@ -65,7 +75,7 @@ def extrair_pasta(pasta_fotos, pasta_saida):
 
     total = {"inteiro": 0, "defeituoso": 0}
     for foto in fotos:
-        contagem = extrair_de_foto(foto, pasta_saida)
+        contagem = extrair_de_foto(foto, pasta_saida, usar_moeda=usar_moeda)
         total["inteiro"] += contagem["inteiro"]
         total["defeituoso"] += contagem["defeituoso"]
         print(f"{foto.name}: {contagem['inteiro']} inteiros, "
@@ -83,8 +93,11 @@ def main():
     parser.add_argument("fotos", help="pasta com as fotos de lote")
     parser.add_argument("--saida", default=str(config.DATA_DIR / "recortes"),
                         help="pasta onde salvar os recortes")
+    parser.add_argument("--sem-moeda", action="store_true",
+                        help="não procura moeda nas fotos (use em fotos sem moeda)")
     argumentos = parser.parse_args()
-    extrair_pasta(argumentos.fotos, argumentos.saida)
+    extrair_pasta(argumentos.fotos, argumentos.saida,
+                  usar_moeda=not argumentos.sem_moeda)
 
 
 if __name__ == "__main__":

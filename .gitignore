@@ -10,3 +10,4 @@ models/*
 *.keras
 *.tflite
 .DS_Store
+!models/grain_cnn.keras
