@@ -60,19 +60,50 @@ classificação continuam funcionando, só as medidas em milímetros deixam de s
 
 ## Treinar a CNN
 
-O modelo não vem pronto no repositório: ele precisa ser treinado com as fotos do
-próprio grupo, porque uma rede treinada em outro grão, outra iluminação e outra
-câmera não transfere bem. São três passos.
+O modelo treinado já está no repositório (`models/grain_cnn.keras`): basta clonar
+e rodar a aplicação, que carrega a CNN sozinha. Quando o arquivo não existe, a
+aplicação não quebra: ela cai no critério clássico, que separa os grãos por área
+relativa e solidez do contorno. A barra de status mostra qual dos dois está em uso.
 
-**1. Gerar os recortes** a partir das fotos de lote guardadas em `data/fotos`:
+### Dados usados no treino
+
+- **Dataset público Soybean Seeds** ([Mendeley](https://data.mendeley.com/datasets/v6vzvfszj6),
+  Lin et al., 2023): grãos individuais fotografados com câmera industrial. Usamos
+  as classes *Intact* (inteiro) e *Broken* (defeituoso), cerca de 2.200 recortes.
+- **Imagens de soja da internet**, sobre fundo branco e escolhidas à mão: cerca de
+  150 recortes, conferidos manualmente.
+
+As imagens do dataset passam pelo mesmo recorte da aplicação (máscara do contorno,
+fundo preto, 64x64) com `src/prepare_mendeley.py`, para que a rede treine com o
+mesmo tipo de imagem que vê depois:
+
+```bash
+python -m src.prepare_mendeley "pasta/do/dataset" --saida data/recortes_mendeley
+```
+
+### Resultados
+
+| Modelo | Treinado com | Validação | Teste com imagens externas |
+| --- | --- | --- | --- |
+| Só dataset | Soybean Seeds | 93,4% | 51,7% (marcou todos os grãos como defeituosos) |
+| Dataset + internet (em uso) | Soybean Seeds + imagens externas | 95,9% | 100% (29 grãos) |
+
+O modelo treinado só com o dataset não generalizava: as imagens são todas da mesma
+câmera e da mesma luz. Somar imagens de outras fontes resolveu. O teste externo é
+pequeno, e a validação definitiva fica para fotos tiradas pelo grupo.
+
+### Treinar de novo
+
+**1. Gerar os recortes** a partir de fotos de lote em `data/fotos`:
 
 ```bash
 python -m src.dataset data/fotos --saida data/recortes
 ```
 
-Cada grão vira uma imagem de 64x64 pixels, já pré-separada nas pastas `inteiro` e
-`defeituoso` pelo critério clássico. O trabalho manual é só abrir as duas pastas e
-arrastar os recortes que ficaram na pasta errada.
+Cada grão vira uma imagem de 64x64, pré-separada nas pastas `inteiro` e
+`defeituoso` pelo critério clássico; depois é só conferir e mover os que ficaram
+errados. Para fotos sem moeda (por exemplo, imagens da internet), use `--sem-moeda`:
+sem essa opção, um círculo falso pode ser tomado como moeda e apagar os grãos.
 
 **2. Treinar**, localmente ou no Colab pelo notebook `notebooks/treino_cnn.ipynb`:
 
@@ -80,12 +111,9 @@ arrastar os recortes que ficaram na pasta errada.
 python -m src.train --dados data/recortes --saida models/grain_cnn.keras
 ```
 
-**3. Rodar a aplicação.** Ela carrega o modelo sozinha na abertura.
-
-Quando o arquivo do modelo não existe, a aplicação não quebra: ela cai no critério
-clássico, que separa os grãos por área relativa e solidez do contorno sem precisar
-de treino. A barra de status mostra qual dos dois está em uso.
-
+Para o Colab, compacte a pasta `recortes` pelo Explorador do Windows (botão
+direito → Enviar para → Pasta compactada). O zip criado pelo `Compress-Archive` do
+PowerShell não é lido pelo notebook.
 ## Estrutura
 
 | Arquivo | O que faz |

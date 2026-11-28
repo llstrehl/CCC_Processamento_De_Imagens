@@ -10,19 +10,25 @@ import numpy as np
 from . import config
 
 
-def resize_to_width(image, max_width=config.MAX_WIDTH_PX):
+def resize_to_width(image, max_width=config.MAX_WIDTH_PX, min_width=config.MIN_WIDTH_PX):
     """Reduz a imagem se ela for mais larga que ``max_width``.
 
     Devolve ``(imagem, fator)``, em que ``fator`` é quanto a imagem foi
     reduzida (1.0 quando não houve redução). Fotos de celular têm 3000 px ou
     mais de largura e o Watershed fica lento sem essa redução.
+    Imagens pequenas (bajadas da internet) são ampliadas: com grãos de poucos pixels, a
+    morfologia apagaria os grãos antes do Watershed.
     """
     height, width = image.shape[:2]
-    if width <= max_width:
+    if width > max_width:
+        target, interpolation = max_width, cv2.INTER_AREA
+    elif width < min_width:
+        target, interpolation = min_width, cv2.INTER_CUBIC
+    else:
         return image, 1.0
-    factor = max_width / float(width)
-    new_size = (max_width, int(round(height * factor)))
-    return cv2.resize(image, new_size, interpolation=cv2.INTER_AREA), factor
+    factor = target / float(width)
+    new_size = (target, int(round(height * factor)))
+    return cv2.resize(image, new_size, interpolation=interpolation), factor
 
 
 def has_light_background(gray, border=10):

@@ -42,6 +42,7 @@ MORPH_ITERATIONS = 3
 # Redimensionamento: fotos de celular são grandes demais para o Watershed
 # rodar rápido. A imagem é reduzida para esta largura antes do processamento.
 MAX_WIDTH_PX = 1280
+MIN_WIDTH_PX = 800
 
 # --------------------------------------------------------------------------
 # Detecção da moeda (HoughCircles)
